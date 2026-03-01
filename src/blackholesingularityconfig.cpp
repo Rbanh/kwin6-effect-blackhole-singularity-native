@@ -102,7 +102,7 @@ public:
         connect(m_openDeferMs, qOverload<int>(&QSpinBox::valueChanged), this, [this]() {
             onUserChanged();
         });
-        connect(m_suppressGlass, &QCheckBox::stateChanged, this, [this]() {
+        connect(m_suppressGlass, &QCheckBox::checkStateChanged, this, [this]() {
             onUserChanged();
         });
         connect(m_warp, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this]() {

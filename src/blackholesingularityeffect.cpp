@@ -196,13 +196,12 @@ void BlackholeSingularityEffect::postPaintScreen()
         EffectWindow *w = it->first;
         WindowAnimation &state = it->second;
 
-        w->addRepaintFull();
-
         if (!state.waitingForStart && state.timeline.done()) {
             unredirect(w);
             restoreGlassRoles(w, state);
             it = m_state.erase(it);
         } else {
+            w->addRepaintFull();
             ++it;
         }
     }
@@ -236,6 +235,10 @@ void BlackholeSingularityEffect::onWindowAdded(EffectWindow *w)
 void BlackholeSingularityEffect::onWindowClosed(EffectWindow *w)
 {
     if (isGrabbed(w, WindowClosedGrabRole)) {
+        return;
+    }
+
+    if (m_state.contains(w) && !m_state[w].opening) {
         return;
     }
 
