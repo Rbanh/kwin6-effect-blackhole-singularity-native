@@ -1,1 +1,37 @@
-.cursor
+# IDEs and Editors
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.kate-swp
+*~
+
+# Build Directories
+build/
+/tmp/blackhole-native-build-*
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# Binary Outputs
+*.so
+*.a
+*.o
+bin/
+lib/
+
+# Qt/KDE Generated Files
+*_autogen/
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.qrc.depends
+
+# OS Specific
+.DS_Store
+Thumbs.db
