@@ -2,13 +2,16 @@
 
 This is a native (C++) KWin effect plugin for blackhole-themed open/close window animations.
 
+> **Disclaimer:** This project is entirely vibe-coded.
+
 ## Why this exists
 
-This plugin now follows the same open strategy as KWin's built-in Scale effect:
+This plugin follows the same open strategy as KWin's built-in Scale effect and is designed to work perfectly alongside [kwin-effects-glass](https://github.com/4v3ngR/kwin-effects-glass).
 
 - Start open animation immediately on `windowAdded`
 - Use explicit `from` values for shader progress, scale, and opacity
 - Avoid delayed damage/warmup/fallback state machines
+- Support for preserving background blur/glass effects during animation
 
 ## Build
 
