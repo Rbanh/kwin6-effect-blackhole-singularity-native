@@ -4,6 +4,7 @@
 
 #include <opengl/glshader.h>
 #include <opengl/glshadermanager.h>
+#include <opengl/glframebuffer.h>
 
 #include <KConfigGroup>
 
@@ -215,6 +216,36 @@ void BlackholeSingularityEffect::postPaintScreen()
     }
 
     effects->postPaintScreen();
+}
+
+void BlackholeSingularityEffect::drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const Region &region, WindowPaintData &data)
+{
+    auto it = m_state.find(w);
+    if (it == m_state.end()) {
+        OffscreenEffect::drawWindow(renderTarget, viewport, w, mask, region, data);
+        return;
+    }
+
+    // Capture the background behind the window before we draw our redirected window over it.
+    // This allows the shader to warp the "glass" blur from kwin-effects-glass.
+    const QRectF rect = w->expandedGeometry();
+    const QRect deviceRect = viewport.mapToDeviceCoordinatesAligned(rect);
+
+    std::unique_ptr<GLTexture> background = GLTexture::allocate(GL_RGBA8, deviceRect.size());
+    if (background) {
+        GLFramebuffer fbo(background.get());
+        fbo.blitFromRenderTarget(renderTarget, viewport, rect, QRect(QPoint(0, 0), deviceRect.size()));
+
+        if (m_shader && m_shader->isValid()) {
+            ShaderBinder binder(m_shader.get());
+            glActiveTexture(GL_TEXTURE1);
+            background->bind();
+            m_shader->setUniform(m_uBackgroundSamplerLocation, 1);
+            glActiveTexture(GL_TEXTURE0);
+        }
+    }
+
+    OffscreenEffect::drawWindow(renderTarget, viewport, w, mask, region, data);
 }
 
 bool BlackholeSingularityEffect::blocksDirectScanout() const
@@ -486,6 +517,7 @@ void BlackholeSingularityEffect::loadShader()
     m_uOutlineLocation = m_shader->uniformLocation("uOutline");
     m_uAccretionColorLocation = m_shader->uniformLocation("uAccretionColor");
     m_uRingColorLocation = m_shader->uniformLocation("uRingColor");
+    m_uBackgroundSamplerLocation = m_shader->uniformLocation("uBackgroundSampler");
 
     applyStaticShaderUniforms();
 }

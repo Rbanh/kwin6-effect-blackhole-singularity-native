@@ -1,6 +1,7 @@
 #version 140
 
 uniform sampler2D sampler;
+uniform sampler2D uBackgroundSampler;
 uniform int textureWidth;
 uniform int textureHeight;
 
@@ -52,6 +53,15 @@ vec4 sampleStraight(vec2 uv)
         c.rgb /= c.a;
     }
     return c;
+}
+
+vec4 sampleBackground(vec2 uv)
+{
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+        return vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+    return texture(uBackgroundSampler, uv);
 }
 
 float edgeMask(vec2 uv, float widthPx)
@@ -145,6 +155,15 @@ void main()
     vec4 sampleG = sampleStraight(sampleUv + vec2(-splitUv.y, splitUv.x) * 0.25);
     base.rgb = vec3(sampleR.r, sampleG.g, sampleB.b);
 
+    // Sample and warp the background to match refraction/glass look
+    vec4 bg = sampleBackground(sampleUv);
+    vec4 bgR = sampleBackground(sampleUv + splitUv);
+    vec4 bgB = sampleBackground(sampleUv - splitUv);
+    bg.rgb = vec3(bgR.r, bg.g, bgB.b);
+
+    // Composite window over background
+    vec3 compositeRgb = mix(bg.rgb, base.rgb, base.a);
+
     vec2 px = vec2(1.0 / max(1.0, float(textureWidth)), 1.0 / max(1.0, float(textureHeight)));
     float aC = base.a;
     float aL = sampleStraight(sampleUv - vec2(px.x, 0.0)).a;
@@ -185,13 +204,13 @@ void main()
     vec3 singularityDark = vec3(0.002, 0.003, 0.009);
     float diskLife = smoothstep(0.0, 0.12, collapse);
     float darken = min(0.995, diskMask * (1.05 + 0.45 * collapseShape)) * diskLife;
-    base.rgb = mix(base.rgb, singularityDark, darken);
+    compositeRgb = mix(compositeRgb, singularityDark, darken);
 
     float edgeFade = edgeMask(uv, 2.0);
     float contentVis = edgeFade * reveal;
     float auraVis = opening ? (edgeFade * auraFadeIn) : contentVis;
 
-    float alpha = base.a * contentVis * (1.0 - diskMask * 0.88 * diskLife);
+    float alpha = mix(base.a, 1.0, diskMask * diskLife) * contentVis;
     alpha *= (1.0 - 0.08 * collapseShape * exp(-r * 3.0));
 
     float openingFlash = opening ? (smoothstep(0.0, 0.12, t) * (1.0 - smoothstep(0.22, 0.48, t))) : 0.0;
@@ -209,9 +228,9 @@ void main()
                                    max(ring + outerRing * 0.9 + innerRing * 0.7, ringGlow * 0.85)) +
                                outline * 0.95 + jet * 0.9 + openingFlash * 0.7) * auraVis;
 
-    vec4 windowLayer = vec4(base.rgb, alpha);
+    vec4 mainLayer = vec4(compositeRgb, alpha);
     vec4 auraLayer = vec4(auraRgb, auraAlpha);
-    vec4 outColor = alphaOver(windowLayer, auraLayer);
+    vec4 outColor = alphaOver(mainLayer, auraLayer);
     outColor.rgb *= outColor.a;
     fragColor = outColor;
 }

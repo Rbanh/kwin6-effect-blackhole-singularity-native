@@ -37,9 +37,11 @@ public:
     void postPaintScreen() override;
     bool blocksDirectScanout() const override;
 
+    void drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const Region &region, WindowPaintData &data) override;
+
     int requestedEffectChainPosition() const override
     {
-        return 100;
+        return 51;
     }
 
 protected:
@@ -101,6 +103,7 @@ private:
     int m_uOutlineLocation = -1;
     int m_uAccretionColorLocation = -1;
     int m_uRingColorLocation = -1;
+    int m_uBackgroundSamplerLocation = -1;
 
     int m_durationMs = 700;
     int m_openDeferMs = 220;
