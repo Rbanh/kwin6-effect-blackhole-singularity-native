@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "local@user",
+                "Name": "Rbanh + Codex"
+            }
+        ],
+        "Category": "Window Open/Close Animation",
+        "Description": "Robust blackhole-themed open/close animation with shader distortion and glow",
+        "EnabledByDefault": false,
+        "License": "GPL-3.0-or-later",
+        "Name": "Blackhole Singularity (Native)"
+    },
+    "X-KDE-ConfigModule": "kwin_blackholesingularity_config",
+    "org.kde.kwin.effect": {
+        "exclusiveGroup": "toplevel-open-close-animation"
+    }
+}
