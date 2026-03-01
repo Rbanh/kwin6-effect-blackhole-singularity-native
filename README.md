@@ -2,7 +2,7 @@
 
 This is a native (C++) KWin effect plugin for blackhole-themed open/close window animations.
 
-> **Disclaimer:** This project is entirely vibe-coded. The architecture, shader logic, and build system were developed through rapid iteration and AI-assisted prompt engineering. While it is high-performance and visually polished, it may contain unconventional patterns or "magic" that defies traditional C++ dogma. Use at your own risk, but enjoy the vibes.
+> **Note:** This project is vibe-coded—developed via AI-assisted rapid iteration. It prioritizes high-performance visual results over traditional architectural conventions.
 
 ## Why this exists
 
