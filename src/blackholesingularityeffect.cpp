@@ -186,6 +186,14 @@ void BlackholeSingularityEffect::apply(EffectWindow *window, int mask, WindowPai
         ? interpolate(openOpacityFrom, 1.0f, progress)
         : interpolate(1.0f, m_closeOpacityTo, progress);
 
+    // If we are NOT suppressing glass, we should explicitly ensure the roles are set
+    // so that other effects (like Blur) treat this as a glass window even when transformed.
+    if (!m_suppressGlass) {
+        if (!window->data(WindowForceBlurRole).toBool()) {
+            window->setData(WindowForceBlurRole, true);
+        }
+    }
+
     data *= scale;
     data.multiplyOpacity(opacity);
 }
