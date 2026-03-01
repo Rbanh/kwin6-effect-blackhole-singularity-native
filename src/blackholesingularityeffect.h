@@ -39,7 +39,7 @@ public:
 
     int requestedEffectChainPosition() const override
     {
-        return 50;
+        return 100;
     }
 
 protected:
@@ -104,6 +104,7 @@ private:
 
     int m_durationMs = 700;
     int m_openDeferMs = 220;
+    bool m_suppressGlass = true;
 
     float m_warp = 1.35f;
     float m_glow = 2.45f;

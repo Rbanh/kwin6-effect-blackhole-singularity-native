@@ -3,6 +3,7 @@
 #include <KPluginFactory>
 #include <KSharedConfig>
 
+#include <QCheckBox>
 #include <QColor>
 #include <QColorDialog>
 #include <QDoubleSpinBox>
@@ -54,6 +55,10 @@ public:
         m_openDeferMs->setSuffix(tr(" ms"));
         timingLayout->addRow(tr("Open defer"), m_openDeferMs);
 
+        m_suppressGlass = new QCheckBox(timingGroup);
+        m_suppressGlass->setText(tr("Suppress Glass Effect during animation"));
+        timingLayout->addRow(tr("Glass Effect"), m_suppressGlass);
+
         auto *shaderGroup = new QGroupBox(tr("Shader and Transform"), widget());
         auto *shaderLayout = new QFormLayout(shaderGroup);
 
@@ -95,6 +100,9 @@ public:
             onUserChanged();
         });
         connect(m_openDeferMs, qOverload<int>(&QSpinBox::valueChanged), this, [this]() {
+            onUserChanged();
+        });
+        connect(m_suppressGlass, &QCheckBox::stateChanged, this, [this]() {
             onUserChanged();
         });
         connect(m_warp, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this]() {
@@ -156,6 +164,7 @@ private:
     {
         int durationMs = 700;
         int openDeferMs = 220;
+        bool suppressGlass = true;
 
         double warp = 1.35;
         double glow = 2.45;
@@ -193,6 +202,7 @@ private:
 
         settings.durationMs = group.readEntry(QStringLiteral("Duration"), settings.durationMs);
         settings.openDeferMs = group.readEntry(QStringLiteral("OpenDeferMs"), settings.openDeferMs);
+        settings.suppressGlass = group.readEntry(QStringLiteral("SuppressGlass"), settings.suppressGlass);
 
         settings.warp = group.readEntry(QStringLiteral("Warp"), settings.warp);
         settings.glow = group.readEntry(QStringLiteral("Glow"), settings.glow);
@@ -216,6 +226,7 @@ private:
 
         group.writeEntry(QStringLiteral("Duration"), settings.durationMs);
         group.writeEntry(QStringLiteral("OpenDeferMs"), settings.openDeferMs);
+        group.writeEntry(QStringLiteral("SuppressGlass"), settings.suppressGlass);
 
         group.writeEntry(QStringLiteral("Warp"), settings.warp);
         group.writeEntry(QStringLiteral("Glow"), settings.glow);
@@ -237,6 +248,7 @@ private:
         Settings settings;
         settings.durationMs = m_durationMs->value();
         settings.openDeferMs = m_openDeferMs->value();
+        settings.suppressGlass = m_suppressGlass->isChecked();
 
         settings.warp = m_warp->value();
         settings.glow = m_glow->value();
@@ -259,6 +271,7 @@ private:
 
         m_durationMs->setValue(settings.durationMs);
         m_openDeferMs->setValue(settings.openDeferMs);
+        m_suppressGlass->setChecked(settings.suppressGlass);
 
         m_warp->setValue(settings.warp);
         m_glow->setValue(settings.glow);
@@ -306,6 +319,7 @@ private:
 
     QSpinBox *m_durationMs = nullptr;
     QSpinBox *m_openDeferMs = nullptr;
+    QCheckBox *m_suppressGlass = nullptr;
 
     QDoubleSpinBox *m_warp = nullptr;
     QDoubleSpinBox *m_glow = nullptr;

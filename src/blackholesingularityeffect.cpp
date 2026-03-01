@@ -102,6 +102,7 @@ void BlackholeSingularityEffect::reconfigure(ReconfigureFlags flags)
 
     m_durationMs = std::max(1, group.readEntry(QStringLiteral("Duration"), 700));
     m_openDeferMs = std::max(0, group.readEntry(QStringLiteral("OpenDeferMs"), 220));
+    m_suppressGlass = group.readEntry(QStringLiteral("SuppressGlass"), true);
 
     m_warp = group.readEntry(QStringLiteral("Warp"), 1.35f);
     m_glow = group.readEntry(QStringLiteral("Glow"), 2.45f);
@@ -316,7 +317,7 @@ BlackholeSingularityEffect::WindowAnimation &BlackholeSingularityEffect::stateFo
 
 void BlackholeSingularityEffect::suppressGlassRoles(EffectWindow *w, WindowAnimation &state)
 {
-    if (state.blurSuppressed) {
+    if (state.blurSuppressed || !m_suppressGlass) {
         return;
     }
 
