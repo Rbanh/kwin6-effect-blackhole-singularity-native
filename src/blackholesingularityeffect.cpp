@@ -2,9 +2,12 @@
 
 #include <effect/effecthandler.h>
 
+#include <core/renderviewport.h>
+#include <core/rect.h>
 #include <opengl/glshader.h>
 #include <opengl/glshadermanager.h>
 #include <opengl/glframebuffer.h>
+#include <opengl/gltexture.h>
 
 #include <KConfigGroup>
 
@@ -164,6 +167,7 @@ void BlackholeSingularityEffect::apply(EffectWindow *window, int mask, WindowPai
 {
     Q_UNUSED(mask)
     Q_UNUSED(quads)
+    (void)data;
 
     auto it = m_state.find(window);
     if (it == m_state.end()) {
@@ -187,8 +191,6 @@ void BlackholeSingularityEffect::apply(EffectWindow *window, int mask, WindowPai
 
     // We no longer apply scale/opacity to 'data' in C++.
     // Instead, the shader handles the shrink and fade (via reveal/diskMask).
-    // This ensures the quad remains full-sized so we can warp the background
-    // even where the window used to be.
 }
 
 void BlackholeSingularityEffect::postPaintScreen()
@@ -226,7 +228,7 @@ void BlackholeSingularityEffect::drawWindow(const RenderTarget &renderTarget, co
     std::unique_ptr<GLTexture> background = GLTexture::allocate(GL_RGBA8, deviceRect.size());
     if (background) {
         GLFramebuffer fbo(background.get());
-        fbo.blitFromRenderTarget(renderTarget, viewport, rect, QRect(QPoint(0, 0), deviceRect.size()));
+        fbo.blitFromRenderTarget(renderTarget, viewport, Rect(rect.toRect()), Rect(0, 0, deviceRect.width(), deviceRect.height()));
 
         if (m_shader && m_shader->isValid()) {
             ShaderBinder binder(m_shader.get());
@@ -468,6 +470,9 @@ void BlackholeSingularityEffect::loadShader()
     m_uOutlineLocation = -1;
     m_uAccretionColorLocation = -1;
     m_uRingColorLocation = -1;
+    m_uBackgroundSamplerLocation = -1;
+    m_uTextureWidthLocation = -1;
+    m_uTextureHeightLocation = -1;
 
     QString selectedShaderPath;
     const QByteArray fragmentSource = readShaderResource(
