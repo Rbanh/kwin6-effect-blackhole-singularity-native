@@ -177,16 +177,6 @@ void BlackholeSingularityEffect::apply(EffectWindow *window, int mask, WindowPai
         applyWindowShaderUniforms(window, state, progress);
     }
 
-    const float openScaleFrom = std::clamp(m_closeScaleTo, 0.05f, 1.20f);
-    const float openOpacityFrom = std::clamp(m_closeOpacityTo, 0.0f, 1.0f);
-
-    const float scale = state.opening
-        ? interpolate(openScaleFrom, 1.0f, progress)
-        : interpolate(1.0f, m_closeScaleTo, progress);
-    const float opacity = state.opening
-        ? interpolate(openOpacityFrom, 1.0f, progress)
-        : interpolate(1.0f, m_closeOpacityTo, progress);
-
     // If we are NOT suppressing glass, we should explicitly ensure the roles are set
     // so that other effects (like Blur) treat this as a glass window even when transformed.
     if (!m_suppressGlass) {
@@ -195,8 +185,10 @@ void BlackholeSingularityEffect::apply(EffectWindow *window, int mask, WindowPai
         }
     }
 
-    data *= scale;
-    data.multiplyOpacity(opacity);
+    // We no longer apply scale/opacity to 'data' in C++.
+    // Instead, the shader handles the shrink and fade (via reveal/diskMask).
+    // This ensures the quad remains full-sized so we can warp the background
+    // even where the window used to be.
 }
 
 void BlackholeSingularityEffect::postPaintScreen()
@@ -518,6 +510,8 @@ void BlackholeSingularityEffect::loadShader()
     m_uAccretionColorLocation = m_shader->uniformLocation("uAccretionColor");
     m_uRingColorLocation = m_shader->uniformLocation("uRingColor");
     m_uBackgroundSamplerLocation = m_shader->uniformLocation("uBackgroundSampler");
+    m_uTextureWidthLocation = m_shader->uniformLocation("textureWidth");
+    m_uTextureHeightLocation = m_shader->uniformLocation("textureHeight");
 
     applyStaticShaderUniforms();
 }
@@ -565,6 +559,16 @@ void BlackholeSingularityEffect::applyWindowShaderUniforms(EffectWindow *w,
     }
 
     ShaderBinder binder(m_shader.get());
+
+    if (m_uTextureWidthLocation >= 0) {
+        m_shader->setUniform(m_uTextureWidthLocation, w->width());
+    }
+    if (m_uTextureHeightLocation >= 0) {
+        m_shader->setUniform(m_uTextureHeightLocation, w->height());
+    }
+    if (m_uBackgroundSamplerLocation >= 0) {
+        m_shader->setUniform(m_uBackgroundSamplerLocation, 1);
+    }
 
     if (m_uProgressLocation >= 0) {
         m_shader->setUniform(m_uProgressLocation, std::clamp(progress, 0.0f, 1.0f));

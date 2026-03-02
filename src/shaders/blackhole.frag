@@ -210,7 +210,9 @@ void main()
     float contentVis = edgeFade * reveal;
     float auraVis = opening ? (edgeFade * auraFadeIn) : contentVis;
 
-    float alpha = mix(base.a, 1.0, diskMask * diskLife) * contentVis;
+    // Use alpha 1.0 to replace the static background with our warped composite.
+    // We only do this where the window is or the black hole effect is visible.
+    float alpha = max(base.a > 0.0 ? 1.0 : 0.0, diskMask) * contentVis;
     alpha *= (1.0 - 0.08 * collapseShape * exp(-r * 3.0));
 
     float openingFlash = opening ? (smoothstep(0.0, 0.12, t) * (1.0 - smoothstep(0.22, 0.48, t))) : 0.0;

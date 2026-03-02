@@ -104,6 +104,8 @@ private:
     int m_uAccretionColorLocation = -1;
     int m_uRingColorLocation = -1;
     int m_uBackgroundSamplerLocation = -1;
+    int m_uTextureWidthLocation = -1;
+    int m_uTextureHeightLocation = -1;
 
     int m_durationMs = 700;
     int m_openDeferMs = 220;
